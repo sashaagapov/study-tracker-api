@@ -41,6 +41,17 @@ app.MapGet("/api/topics/{id}", (int id, LearningTopicService service) =>
 // Create a new topic from the request body and return 201 Created.
 app.MapPost("/api/topics", (CreateLearningTopicRequest request, LearningTopicService service) =>
 {
+    if (string.IsNullOrWhiteSpace(request.Title))
+    {
+        return Results.BadRequest("Title is required.");
+    }
+    if (request.Status != "Planned" &&
+    request.Status != "Learning" &&
+    request.Status != "Partial" &&
+    request.Status != "Confirmed")
+    {
+        return Results.BadRequest("Invalid status.");
+    }
     LearningTopic newTopic = service.Create(request);
 
     return Results.Created($"/api/topics/{newTopic.Id}", newTopic);
