@@ -1,3 +1,5 @@
+using StudyTracker.Api.Models;
+using StudyTracker.Api.DTOs;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -95,7 +97,3 @@ app.MapDelete("/api/topics/{id}", (int id) =>
 });
 
 app.Run();
-
-record LearningTopic(int Id, string Title, string Status);
-record CreateLearningTopicRequest(string Title, string Status);
-record UpdateLearningTopicRequest(string Title, string Status);
