@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "94nVhn12+Gc=",
+  "success": true,
+  "projectFilePath": "/Users/agapov/Desktop/Backend-Portfolio-Project/StudyTracker.Api/StudyTracker.Api.csproj",
+  "expectedPackageFiles": [
+    "/Users/agapov/.nuget/packages/microsoft.aspnetcore.openapi/10.0.1/microsoft.aspnetcore.openapi.10.0.1.nupkg.sha512",
+    "/Users/agapov/.nuget/packages/microsoft.openapi/2.0.0/microsoft.openapi.2.0.0.nupkg.sha512"
+  ],
+  "logs": []
+}
