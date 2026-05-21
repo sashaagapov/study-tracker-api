@@ -1,3 +1,9 @@
 namespace StudyTracker.Api.Models;
 
+/// <summary>
+/// Represents a learning topic tracked by the API.
+/// </summary>
+/// <param name="Id">The unique identifier of the topic.</param>
+/// <param name="Title">The display title of the topic.</param>
+/// <param name="Status">The current learning status of the topic.</param>
 public record LearningTopic(int Id, string Title, string Status);

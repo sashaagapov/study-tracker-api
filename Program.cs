@@ -1,99 +1,76 @@
 using StudyTracker.Api.Models;
 using StudyTracker.Api.DTOs;
+using StudyTracker.Api.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+// Register framework and application services in the dependency injection container.
 builder.Services.AddOpenApi();
+builder.Services.AddSingleton<LearningTopicService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Enable OpenAPI only during development to keep the setup beginner-friendly.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
 }
-List<LearningTopic> topics = new List<LearningTopic>
-    {
-        new LearningTopic(1, "ASP.NET Core Web API", "Learning"),
-        new LearningTopic(2, "EF Core", "Planned"),
-        new LearningTopic(3, "PostgreSQL", "Planned")
-    };
 
+// Redirect HTTP requests to HTTPS when possible.
 app.UseHttpsRedirection();
 
-app.MapGet("/api/topics", () =>
+// Return the full list of learning topics.
+app.MapGet("/api/topics", (LearningTopicService service) =>
 {
-    return Results.Ok(topics);
+    return Results.Ok(service.GetAll());
 });
 
-app.MapGet("/api/topics/{id}", (int id) =>
+// Return a single topic by id or 404 when it does not exist.
+app.MapGet("/api/topics/{id}", (int id, LearningTopicService service) =>
 {
-    LearningTopic? foundTopic = null;
-    foreach (LearningTopic topic in topics)
-    {
-        if (topic.Id == id)
-        {
-            foundTopic = topic;
-        }
-    }
-    if (foundTopic == null)
+    LearningTopic? topic = service.GetById(id);
+
+    if (topic == null)
     {
         return Results.NotFound();
     }
-    return Results.Ok(foundTopic);
+
+    return Results.Ok(topic);
 });
 
-app.MapPost("/api/topics", (CreateLearningTopicRequest request) =>
+// Create a new topic from the request body and return 201 Created.
+app.MapPost("/api/topics", (CreateLearningTopicRequest request, LearningTopicService service) =>
 {
-    int newId = topics.Count + 1;
-    LearningTopic newTopic = new LearningTopic(newId, request.Title, request.Status);
-    topics.Add(newTopic);
+    LearningTopic newTopic = service.Create(request);
+
     return Results.Created($"/api/topics/{newTopic.Id}", newTopic);
 });
-app.MapPut("/api/topics/{id}", (int id, UpdateLearningTopicRequest request) =>
+
+// Update an existing topic or return 404 when the topic is missing.
+app.MapPut("/api/topics/{id}", (int id, UpdateLearningTopicRequest request, LearningTopicService service) =>
 {
-    int foundIndex = -1;
+    LearningTopic? updatedTopic = service.Update(id, request);
 
-    for (int i = 0; i < topics.Count; i++)
-    {
-        if (topics[i].Id == id)
-        {
-            foundIndex = i;
-        }
-    }
-
-    if (foundIndex == -1)
+    if (updatedTopic == null)
     {
         return Results.NotFound();
     }
-
-    LearningTopic updatedTopic = new LearningTopic(id, request.Title, request.Status);
-
-    topics[foundIndex] = updatedTopic;
 
     return Results.Ok(updatedTopic);
 });
-app.MapDelete("/api/topics/{id}", (int id) =>
+
+// Delete an existing topic or return 404 when the topic is missing.
+app.MapDelete("/api/topics/{id}", (int id, LearningTopicService service) =>
 {
-    int foundIndex = -1;
+    bool wasDeleted = service.Delete(id);
 
-    for (int i = 0; i < topics.Count; i++)
-    {
-        if (topics[i].Id == id)
-        {
-            foundIndex = i;
-        }
-    }
-
-    if (foundIndex == -1)
+    if (!wasDeleted)
     {
         return Results.NotFound();
     }
-
-    topics.RemoveAt(foundIndex);
 
     return Results.NoContent();
 });
 
+// Start the web application.
 app.Run();
