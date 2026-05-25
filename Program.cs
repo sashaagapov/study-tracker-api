@@ -60,6 +60,19 @@ app.MapPost("/api/topics", (CreateLearningTopicRequest request, LearningTopicSer
 // Update an existing topic or return 404 when the topic is missing.
 app.MapPut("/api/topics/{id}", (int id, UpdateLearningTopicRequest request, LearningTopicService service) =>
 {
+    if (string.IsNullOrWhiteSpace(request.Title))
+    {
+        return Results.BadRequest("Title is required.");
+    }
+
+    if (request.Status != "Planned" &&
+        request.Status != "Learning" &&
+        request.Status != "Partial" &&
+        request.Status != "Confirmed")
+    {
+        return Results.BadRequest("Invalid status.");
+    }
+    
     LearningTopic? updatedTopic = service.Update(id, request);
 
     if (updatedTopic == null)

@@ -1,6 +1,49 @@
 @StudyTracker.Api_HostAddress = http://localhost:5007
 
-GET {{StudyTracker.Api_HostAddress}}/weatherforecast/
+### Get all topics
+GET {{StudyTracker.Api_HostAddress}}/api/topics
 Accept: application/json
 
-###
+### Get topic by id
+GET {{StudyTracker.Api_HostAddress}}/api/topics/1
+Accept: application/json
+
+### Create topic
+POST {{StudyTracker.Api_HostAddress}}/api/topics
+Content-Type: application/json
+
+{
+  "title": "Validation",
+  "status": "Planned"
+}
+
+### Update topic
+PUT {{StudyTracker.Api_HostAddress}}/api/topics/1
+Content-Type: application/json
+
+{
+  "title": "EF Core",
+  "status": "Learning"
+}
+
+### Delete topic
+DELETE {{StudyTracker.Api_HostAddress}}/api/topics/1
+Accept: application/json
+
+### Negative test: invalid status
+POST {{StudyTracker.Api_HostAddress}}/api/topics
+Content-Type: application/json
+
+{
+  "title": "Bad Status Example",
+  "status": "Done"
+}
+
+### Negative test: empty title
+PUT {{StudyTracker.Api_HostAddress}}/api/topics/1
+Content-Type: application/json
+
+{
+  "title": "",
+  "status": "Learning"
+}

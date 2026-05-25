@@ -30,7 +30,7 @@ public class LearningTopicService
     /// <summary>
     /// Finds a topic by its identifier.
     /// </summary>
-    /// <param name="Id">The topic identifier to search for.</param>
+    /// <param name="id">The topic identifier to search for.</param>
     /// <returns>The matching topic, or <see langword="null"/> when it is not found.</returns>
     public LearningTopic? GetById(int id)
     {
@@ -55,8 +55,7 @@ public class LearningTopicService
     /// <returns>The newly created topic.</returns>
     public LearningTopic Create(CreateLearningTopicRequest request)
     {
-        // The next id is generated from the current number of topics.
-        int newId = topics.Count + 1;
+        int newId = topics.Count == 0 ? 1 : topics.Max(topic => topic.Id) + 1;
         LearningTopic newTopic = new LearningTopic(newId, request.Title, request.Status);
 
         topics.Add(newTopic);
