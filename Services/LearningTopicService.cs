@@ -12,11 +12,26 @@ public class LearningTopicService
     /// Stores all topics in application memory for the lifetime of the app.
     /// </summary>
     private readonly List<LearningTopic> topics = new List<LearningTopic>
+{
+    new LearningTopic
     {
-        new LearningTopic(1, "ASP.NET Core Web API", "Learning"),
-        new LearningTopic(2, "EF Core", "Planned"),
-        new LearningTopic(3, "PostgreSQL", "Planned")
-    };
+        Id = 1,
+        Title = "ASP.NET Core Web API",
+        Status = "Learning"
+    },
+    new LearningTopic
+    {
+        Id = 2,
+        Title = "EF Core",
+        Status = "Planned"
+    },
+    new LearningTopic
+    {
+        Id = 3,
+        Title = "PostgreSQL",
+        Status = "Planned"
+    }
+};
 
     /// <summary>
     /// Returns all learning topics.
@@ -56,7 +71,12 @@ public class LearningTopicService
     public LearningTopic Create(CreateLearningTopicRequest request)
     {
         int newId = topics.Count == 0 ? 1 : topics.Max(topic => topic.Id) + 1;
-        LearningTopic newTopic = new LearningTopic(newId, request.Title, request.Status);
+        LearningTopic newTopic = new LearningTopic
+        {
+            Id = newId,
+            Title = request.Title,
+            Status = request.Status
+        };
 
         topics.Add(newTopic);
 
@@ -88,8 +108,12 @@ public class LearningTopicService
         }
 
         // Replace the old topic with a new record containing the updated values.
-        LearningTopic updatedTopic = new LearningTopic(id, request.Title, request.Status);
-        topics[foundIndex] = updatedTopic;
+        LearningTopic updatedTopic = new LearningTopic
+        {
+            Id = id,
+            Title = request.Title,
+            Status = request.Status
+        }; topics[foundIndex] = updatedTopic;
 
         return updatedTopic;
     }

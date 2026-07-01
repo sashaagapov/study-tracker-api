@@ -6,4 +6,11 @@ namespace StudyTracker.Api.Models;
 /// <param name="Id">The unique identifier of the topic.</param>
 /// <param name="Title">The display title of the topic.</param>
 /// <param name="Status">The current learning status of the topic.</param>
-public record LearningTopic(int Id, string Title, string Status);
+public class LearningTopic
+{
+    public int Id { get; set; }
+
+    public string Title { get; set; } = "";
+
+    public string Status { get; set; } = "";
+}

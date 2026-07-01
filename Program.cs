@@ -1,11 +1,18 @@
 using StudyTracker.Api.Models;
 using StudyTracker.Api.DTOs;
 using StudyTracker.Api.Services;
+using StudyTracker.Api.Data;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Register framework and application services in the dependency injection container.
 builder.Services.AddOpenApi();
+
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+builder.Services.AddDbContext<StudyTrackerDbContext>(options =>
+    options.UseNpgsql(connectionString));
+
 builder.Services.AddSingleton<LearningTopicService>();
 
 var app = builder.Build();
@@ -72,7 +79,7 @@ app.MapPut("/api/topics/{id}", (int id, UpdateLearningTopicRequest request, Lear
     {
         return Results.BadRequest("Invalid status.");
     }
-    
+
     LearningTopic? updatedTopic = service.Update(id, request);
 
     if (updatedTopic == null)
