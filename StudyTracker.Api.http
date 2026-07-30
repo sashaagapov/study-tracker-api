@@ -1,49 +1,52 @@
 @StudyTracker.Api_HostAddress = http://localhost:5007
 
 ### Get all topics
-GET {{StudyTracker.Api_HostAddress}}/api/topics
+GET {{StudyTracker.Api_HostAddress}}/api/learning-topics
+Accept: application/json
+
+### Get topics with filters
+GET {{StudyTracker.Api_HostAddress}}/api/learning-topics?status=InProgress&difficulty=Medium&search=api
 Accept: application/json
 
 ### Get topic by id
-GET {{StudyTracker.Api_HostAddress}}/api/topics/1
+GET {{StudyTracker.Api_HostAddress}}/api/learning-topics/1
 Accept: application/json
 
 ### Create topic
-POST {{StudyTracker.Api_HostAddress}}/api/topics
+POST {{StudyTracker.Api_HostAddress}}/api/learning-topics
 Content-Type: application/json
 
 {
   "title": "Validation",
-  "status": "Planned"
+  "description": "Practice request validation and HTTP status codes.",
+  "difficulty": "Easy"
 }
 
 ### Update topic
-PUT {{StudyTracker.Api_HostAddress}}/api/topics/1
+PUT {{StudyTracker.Api_HostAddress}}/api/learning-topics/1
 Content-Type: application/json
 
 {
   "title": "EF Core",
-  "status": "Learning"
+  "description": "Practice DbContext, DbSet, LINQ, and migrations.",
+  "difficulty": "Medium",
+  "status": "InProgress"
 }
 
 ### Delete topic
-DELETE {{StudyTracker.Api_HostAddress}}/api/topics/1
+DELETE {{StudyTracker.Api_HostAddress}}/api/learning-topics/1
 Accept: application/json
 
-### Negative test: invalid status
-POST {{StudyTracker.Api_HostAddress}}/api/topics
-Content-Type: application/json
-
-{
-  "title": "Bad Status Example",
-  "status": "Done"
-}
+### Legacy route from the first version still works
+GET {{StudyTracker.Api_HostAddress}}/api/topics
+Accept: application/json
 
 ### Negative test: empty title
-PUT {{StudyTracker.Api_HostAddress}}/api/topics/1
+POST {{StudyTracker.Api_HostAddress}}/api/learning-topics
 Content-Type: application/json
 
 {
   "title": "",
-  "status": "Learning"
+  "description": "This should fail.",
+  "difficulty": "Easy"
 }

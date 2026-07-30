@@ -1,103 +1,106 @@
 # Study Tracker API
 
-Study Tracker API is a backend portfolio project built with ASP.NET Core Web API using the minimal API style.
+Study Tracker API is a learning project for practicing intern-level ASP.NET Core Web API concepts.
 
-The goal of the project is to track learning topics and their progress status, with a simple structure that can later grow into a more complete backend application.
+Phase 1 keeps the existing Minimal API style and refactors the backend from in-memory storage to EF Core with SQL Server.
 
-## Current State
+## What Was Preserved
 
-At the current stage, the project already has:
+- The existing ASP.NET Core Minimal API project.
+- The original learning-topic CRUD idea.
+- The simple `Controller/Endpoint -> Service -> Data` flow.
+- Legacy `/api/topics` routes, so old HTTP requests still work.
 
-- Learning topics CRUD
-- In-memory storage
-- A separate service layer
-- Request DTOs in separate files
-- Basic validation for `POST` and `PUT`
+## What Was Refactored
 
-## Current Features
+- `LearningTopicService` now uses EF Core instead of an in-memory `List<LearningTopic>`.
+- PostgreSQL/Npgsql was replaced with SQL Server.
+- The service is registered through `ILearningTopicService`.
+- `LearningTopic` became a fuller EF Core entity.
+- DTOs now separate API request/response shapes from database entities.
 
-- `GET /api/topics` — get all topics
-- `GET /api/topics/{id}` — get topic by id
-- `POST /api/topics` — create a topic
-- `PUT /api/topics/{id}` — update a topic
-- `DELETE /api/topics/{id}` — delete a topic
-- In-memory storage for learning topics
-- Validation for request data in `POST` and `PUT`
+## What This Practices
 
-HTTP results currently used:
+- Entity
+- DTO
+- DbContext
+- DbSet
+- EF Core relationship mapping
+- SQL Server provider setup
+- Dependency Injection
+- async/await
+- IQueryable vs ToListAsync
+- REST CRUD
+- Practical SOLID basics
 
-- `200 OK`
-- `201 Created`
-- `204 No Content`
-- `400 Bad Request`
-- `404 Not Found`
+## Run Backend
 
-## Architecture
-
-- `Program.cs` maps endpoints, validates incoming requests, resolves `LearningTopicService` from DI, and returns HTTP results.
-- `LearningTopicService` contains CRUD logic and stores topics in memory.
-- `DTOs` contain request models used for `POST` and `PUT` bodies.
-- `Models` contain the main `LearningTopic` record.
-
-Dependency injection is configured with:
-
-```csharp
-builder.Services.AddSingleton<LearningTopicService>();
-```
-
-## Data Model
-
-Current model:
-
-```csharp
-public record LearningTopic(int Id, string Title, string Status);
-```
-
-Example topic:
-
-```json
-{
-  "id": 1,
-  "title": "ASP.NET Core Web API",
-  "status": "Learning"
-}
-```
-
-Allowed statuses:
-
-- `Planned`
-- `Learning`
-- `Partial`
-- `Confirmed`
-
-Validation rules:
-
-- `Title` cannot be empty
-- `Status` must be one of the allowed values above
-
-## Run Locally
+From this folder:
 
 ```bash
-cd StudyTracker.Api
+dotnet restore
 dotnet run
 ```
 
-By default, the API runs locally on:
+Default local HTTP URL from `StudyTracker.Api.http`:
 
 ```text
 http://localhost:5007
 ```
 
-## Storage
+## SQL Server Connection
 
-The project currently uses in-memory storage. Data exists only while the application is running, and resets after restart.
+`appsettings.json` contains this example connection string:
 
-## Planned Improvements
+```json
+"DefaultConnection": "Server=localhost,1433;Database=StudyTrackerDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=True;"
+```
 
-- PostgreSQL
-- Entity Framework Core
-- Authentication and roles
-- Unit tests
-- Integration tests
-- Docker
-- Evidence system
+You need SQL Server running before EF Core can create or query the real database.
+
+## EF Core Migrations
+
+Install the EF tool if needed:
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+Create a migration:
+
+```bash
+dotnet ef migrations add InitialCreate
+```
+
+Apply it to SQL Server:
+
+```bash
+dotnet ef database update
+```
+
+## Main Endpoints
+
+- `GET /api/learning-topics`
+- `GET /api/learning-topics?status=InProgress&difficulty=Medium&search=api`
+- `GET /api/learning-topics/{id}`
+- `POST /api/learning-topics`
+- `PUT /api/learning-topics/{id}`
+- `DELETE /api/learning-topics/{id}`
+
+Legacy aliases still exist:
+
+- `GET /api/topics`
+- `GET /api/topics/{id}`
+- `POST /api/topics`
+- `PUT /api/topics/{id}`
+- `DELETE /api/topics/{id}`
+
+## Learning Checklist
+
+- Read `Program.cs` to understand Minimal API endpoints and DI.
+- Read `Services/ILearningTopicService.cs` to understand the service contract.
+- Read `Services/LearningTopicService.cs` to understand async EF Core queries.
+- Read `Data/AppDbContext.cs` to understand DbSet, relationships, and seed data.
+- Read `Models/LearningTopic.cs` and `Models/StudySession.cs` to understand entities.
+- Read `DTOs/` to understand API data shapes.
+- Read `Notes/BackendBasics.md` for short interview explanations.

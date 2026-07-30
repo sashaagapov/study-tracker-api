@@ -1,148 +1,135 @@
 using StudyTracker.Api.DTOs;
+using StudyTracker.Api.Data;
 using StudyTracker.Api.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace StudyTracker.Api.Services;
 
 /// <summary>
-/// Provides simple in-memory CRUD operations for learning topics.
+/// Service: keeps learning-topic business logic out of HTTP endpoints.
 /// </summary>
-public class LearningTopicService
+public class LearningTopicService : ILearningTopicService
 {
-    /// <summary>
-    /// Stores all topics in application memory for the lifetime of the app.
-    /// </summary>
-    private readonly List<LearningTopic> topics = new List<LearningTopic>
-{
-    new LearningTopic
-    {
-        Id = 1,
-        Title = "ASP.NET Core Web API",
-        Status = "Learning"
-    },
-    new LearningTopic
-    {
-        Id = 2,
-        Title = "EF Core",
-        Status = "Planned"
-    },
-    new LearningTopic
-    {
-        Id = 3,
-        Title = "PostgreSQL",
-        Status = "Planned"
-    }
-};
+    private readonly AppDbContext _context;
 
-    /// <summary>
-    /// Returns all learning topics.
-    /// </summary>
-    /// <returns>The full in-memory list of topics.</returns>
-    public List<LearningTopic> GetAll()
+    public LearningTopicService(AppDbContext context)
     {
-        return topics;
+        _context = context;
     }
 
-    /// <summary>
-    /// Finds a topic by its identifier.
-    /// </summary>
-    /// <param name="id">The topic identifier to search for.</param>
-    /// <returns>The matching topic, or <see langword="null"/> when it is not found.</returns>
-    public LearningTopic? GetById(int id)
+    public async Task<List<LearningTopicDto>> GetAllAsync(string? status, string? difficulty, string? search)
     {
-        LearningTopic? foundTopic = null;
+        IQueryable<LearningTopic> query = _context.LearningTopics
+            .Include(topic => topic.StudySessions);
 
-        // Loop through all topics and keep the matching topic when the id is found.
-        foreach (LearningTopic topic in topics)
+        if (!string.IsNullOrWhiteSpace(status))
         {
-            if (topic.Id == id)
+            if (Enum.TryParse(status, ignoreCase: true, out TopicStatus parsedStatus))
             {
-                foundTopic = topic;
+                query = query.Where(topic => topic.Status == parsedStatus);
+            }
+            else
+            {
+                query = query.Where(topic => false);
             }
         }
 
-        return foundTopic;
+        if (!string.IsNullOrWhiteSpace(difficulty))
+        {
+            if (Enum.TryParse(difficulty, ignoreCase: true, out TopicDifficulty parsedDifficulty))
+            {
+                query = query.Where(topic => topic.Difficulty == parsedDifficulty);
+            }
+            else
+            {
+                query = query.Where(topic => false);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            query = query.Where(topic => topic.Title.Contains(search));
+        }
+
+        List<LearningTopic> topics = await query
+            .OrderBy(topic => topic.Id)
+            .ToListAsync();
+
+        return topics.Select(MapToDto).ToList();
     }
 
-    /// <summary>
-    /// Creates a new topic and adds it to the in-memory list.
-    /// </summary>
-    /// <param name="request">The data used to create the topic.</param>
-    /// <returns>The newly created topic.</returns>
-    public LearningTopic Create(CreateLearningTopicRequest request)
+    public async Task<LearningTopicDto?> GetByIdAsync(int id)
     {
-        int newId = topics.Count == 0 ? 1 : topics.Max(topic => topic.Id) + 1;
-        LearningTopic newTopic = new LearningTopic
+        LearningTopic? topic = await _context.LearningTopics
+            .Include(topic => topic.StudySessions)
+            .FirstOrDefaultAsync(topic => topic.Id == id);
+
+        return topic is null ? null : MapToDto(topic);
+    }
+
+    public async Task<LearningTopicDto> CreateAsync(CreateLearningTopicDto dto)
+    {
+        LearningTopic topic = new()
         {
-            Id = newId,
-            Title = request.Title,
-            Status = request.Status
+            Title = dto.Title.Trim(),
+            Description = dto.Description.Trim(),
+            Difficulty = dto.Difficulty,
+            Status = TopicStatus.NotStarted,
+            CreatedAt = DateTime.UtcNow
         };
 
-        topics.Add(newTopic);
+        _context.LearningTopics.Add(topic);
+        await _context.SaveChangesAsync();
 
-        return newTopic;
+        return MapToDto(topic);
     }
 
-    /// <summary>
-    /// Updates an existing topic by replacing the old record in the list.
-    /// </summary>
-    /// <param name="id">The identifier of the topic to update.</param>
-    /// <param name="request">The updated topic data.</param>
-    /// <returns>The updated topic, or <see langword="null"/> when the topic does not exist.</returns>
-    public LearningTopic? Update(int id, UpdateLearningTopicRequest request)
+    public async Task<bool> UpdateAsync(int id, UpdateLearningTopicDto dto)
     {
-        int foundIndex = -1;
+        LearningTopic? topic = await _context.LearningTopics
+            .FirstOrDefaultAsync(topic => topic.Id == id);
 
-        // Search for the index so the existing item can be replaced in-place.
-        for (int i = 0; i < topics.Count; i++)
-        {
-            if (topics[i].Id == id)
-            {
-                foundIndex = i;
-            }
-        }
-
-        if (foundIndex == -1)
-        {
-            return null;
-        }
-
-        // Replace the old topic with a new record containing the updated values.
-        LearningTopic updatedTopic = new LearningTopic
-        {
-            Id = id,
-            Title = request.Title,
-            Status = request.Status
-        }; topics[foundIndex] = updatedTopic;
-
-        return updatedTopic;
-    }
-
-    /// <summary>
-    /// Deletes a topic from the in-memory list.
-    /// </summary>
-    /// <param name="id">The identifier of the topic to delete.</param>
-    /// <returns><see langword="true"/> when the topic was removed; otherwise, <see langword="false"/>.</returns>
-    public bool Delete(int id)
-    {
-        int foundIndex = -1;
-
-        // Search for the index of the topic that should be removed.
-        for (int i = 0; i < topics.Count; i++)
-        {
-            if (topics[i].Id == id)
-            {
-                foundIndex = i;
-            }
-        }
-
-        if (foundIndex == -1)
+        if (topic is null)
         {
             return false;
         }
 
-        topics.RemoveAt(foundIndex);
+        topic.Title = dto.Title.Trim();
+        topic.Description = dto.Description.Trim();
+        topic.Difficulty = dto.Difficulty;
+        topic.Status = dto.Status;
+        topic.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        return true;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        LearningTopic? topic = await _context.LearningTopics
+            .FirstOrDefaultAsync(topic => topic.Id == id);
+
+        if (topic is null)
+        {
+            return false;
+        }
+
+        _context.LearningTopics.Remove(topic);
+        await _context.SaveChangesAsync();
 
         return true;
+    }
+
+    private static LearningTopicDto MapToDto(LearningTopic topic)
+    {
+        return new LearningTopicDto(
+            topic.Id,
+            topic.Title,
+            topic.Description,
+            topic.Difficulty,
+            topic.Status,
+            topic.CreatedAt,
+            topic.UpdatedAt,
+            topic.StudySessions.Count);
     }
 }

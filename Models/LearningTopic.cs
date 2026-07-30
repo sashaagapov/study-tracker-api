@@ -1,16 +1,23 @@
 namespace StudyTracker.Api.Models;
 
 /// <summary>
-/// Represents a learning topic tracked by the API.
+/// Entity: represents a database table row for a learning topic.
 /// </summary>
-/// <param name="Id">The unique identifier of the topic.</param>
-/// <param name="Title">The display title of the topic.</param>
-/// <param name="Status">The current learning status of the topic.</param>
 public class LearningTopic
 {
     public int Id { get; set; }
 
     public string Title { get; set; } = "";
 
-    public string Status { get; set; } = "";
+    public string Description { get; set; } = "";
+
+    public TopicDifficulty Difficulty { get; set; }
+
+    public TopicStatus Status { get; set; }
+
+    public DateTime CreatedAt { get; set; }
+
+    public DateTime? UpdatedAt { get; set; }
+
+    public ICollection<StudySession> StudySessions { get; set; } = new List<StudySession>();
 }
