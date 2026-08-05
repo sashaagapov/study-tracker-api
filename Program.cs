@@ -160,15 +160,7 @@ static void MapStudySessionEndpoints(WebApplication app, string routePrefix)
      int id,
      IStudySessionsService service) =>
  {
-     try
-     {
-         await service.DeleteAsync(id);
-
-         return Results.NoContent();
-     }
-     catch (KeyNotFoundException ex)
-     {
-         return Results.NotFound(ex.Message);
-     }
+     await service.DeleteAsync(id);
+     return Results.NoContent();
  });
 }

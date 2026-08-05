@@ -3,17 +3,30 @@ namespace StudyTracker.Api.Exceptions;
 
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
+    private readonly ILogger<GlobalExceptionHandler> _logger;
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
+    {
+        _logger = logger;
+    }
     public async ValueTask<bool> TryHandleAsync(
     HttpContext httpContext,
     Exception exception,
     CancellationToken cancellationToken)
     {
+        _logger.LogError(
+    exception,
+    "Unhandled exception while processing {Method} {Path}",
+    httpContext.Request.Method,
+    httpContext.Request.Path);
         int statusCode = GetStatusCode(exception);
+        string detail = statusCode == StatusCodes.Status500InternalServerError
+    ? "An unexpected error occurred."
+    : exception.Message;
         httpContext.Response.StatusCode = statusCode;
         await httpContext.Response.WriteAsJsonAsync(
             new
             {
-                error = exception.Message
+                error = detail
             },
         cancellationToken);
         return true;
