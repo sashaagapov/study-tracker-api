@@ -1,12 +1,17 @@
 using Microsoft.AspNetCore.Diagnostics;
 namespace StudyTracker.Api.Exceptions;
 
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.AspNetCore.Mvc;
+
 public sealed class GlobalExceptionHandler : IExceptionHandler
 {
     private readonly ILogger<GlobalExceptionHandler> _logger;
-    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger)
+    private readonly IProblemDetailsService _problemDetailsService;
+    public GlobalExceptionHandler(ILogger<GlobalExceptionHandler> logger, IProblemDetailsService problemDetailsService)
     {
         _logger = logger;
+        _problemDetailsService = problemDetailsService;
     }
     public async ValueTask<bool> TryHandleAsync(
     HttpContext httpContext,
@@ -23,12 +28,19 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
     ? "An unexpected error occurred."
     : exception.Message;
         httpContext.Response.StatusCode = statusCode;
-        await httpContext.Response.WriteAsJsonAsync(
-            new
-            {
-                error = detail
-            },
-        cancellationToken);
+        await _problemDetailsService.WriteAsync(
+    new ProblemDetailsContext
+    {
+        HttpContext = httpContext,
+        Exception = exception,
+        ProblemDetails = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = ReasonPhrases.GetReasonPhrase(statusCode),
+            Detail = detail
+        }
+    });
+
         return true;
     }
     public static int GetStatusCode(Exception exception)
@@ -38,8 +50,8 @@ public sealed class GlobalExceptionHandler : IExceptionHandler
             KeyNotFoundException =>
                 StatusCodes.Status404NotFound,
 
-            ArgumentException =>
-                StatusCodes.Status400BadRequest,
+            ValidationException =>
+     StatusCodes.Status400BadRequest,
 
             _ =>
                 StatusCodes.Status500InternalServerError

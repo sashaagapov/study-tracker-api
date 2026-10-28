@@ -1,6 +1,7 @@
 using StudyTracker.Api.Data;
 using StudyTracker.Api.DTOs;
 using StudyTracker.Api.Models;
+using StudyTracker.Api.Exceptions;
 using Microsoft.EntityFrameworkCore;
 namespace StudyTracker.Api.Services;
 
@@ -16,11 +17,11 @@ public class StudySessionService : IStudySessionsService
     {
         if (dto.DurationMinutes <= 0)
         {
-            throw new ArgumentOutOfRangeException(nameof(dto.DurationMinutes), "Duration must be greater than zero.");
+            throw new ValidationException("Duration must be greater than zero.");
         }
         if (dto.Date > DateTime.UtcNow)
         {
-            throw new ArgumentException(nameof(dto.Date), "Duration cannot be set in future");
+            throw new ValidationException("Date cannot be set in the future.");
         }
         bool topicExists = await _context.LearningTopics
     .AnyAsync(x => x.Id == dto.LearningTopicId);
@@ -75,10 +76,10 @@ public class StudySessionService : IStudySessionsService
    );
         return dto;
     }
-    public async Task DeleteAsync (int id)
+    public async Task DeleteAsync(int id)
     {
         StudySession? session = await _context.StudySessions.FirstOrDefaultAsync(x => x.Id == id);
-        if(session == null)
+        if (session == null)
         {
             throw new KeyNotFoundException($"There are no session with ID: {id}");
         }

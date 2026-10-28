@@ -124,26 +124,12 @@ static void MapStudySessionEndpoints(WebApplication app, string routePrefix)
     CreateStudySessionDto dto,
     IStudySessionsService service) =>
 {
-    try
-    {
-        StudySessionDto createdSession = await service.Create(dto);
-        return Results.Created(
-        $"/api/study-sessions/{createdSession.Id}", createdSession
-        );
-    }
-    catch (KeyNotFoundException ex)
-    {
-        return Results.NotFound(ex.Message);
-    }
-    catch (ArgumentOutOfRangeException ex)
-    {
-        return Results.BadRequest(ex.Message);
-    }
-    catch (ArgumentException ex)
-    {
-        return Results.BadRequest(ex.Message);
-    }
-});
+    StudySessionDto createdSession = await service.Create(dto);
+
+    return Results.Created(
+        $"/api/study-sessions/{createdSession.Id}",
+        createdSession);
+}).ProducesProblem(StatusCodes.Status400BadRequest);
     group.MapGet("", async (IStudySessionsService service) =>
     {
         List<StudySessionDto> sessions = await service.GetAllAsync();
