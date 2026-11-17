@@ -8,15 +8,7 @@ An ASP.NET Core Minimal API for organizing learning topics and recording study s
 
 ## API flow
 
-```mermaid
-flowchart LR
-    Client[HTTP client] --> Routes["Minimal API routes\nProgram.cs"]
-    Routes --> Topics[LearningTopicService]
-    Routes --> Sessions[StudySessionService]
-    Topics --> Context["AppDbContext\nEF Core"]
-    Sessions --> Context
-    Context --> Database[(SQL Server)]
-```
+![API flow: HTTP client to minimal API routes, topic and session services, EF Core DbContext, and SQL Server](docs/api-flow.svg)
 
 The endpoints use services for topic and session operations. EF Core maps the one-to-many relationship between a learning topic and its study sessions. Unhandled exceptions pass through the configured exception handler.
 

@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 240" role="img" aria-label="HTTP client to API routes, services, EF Core DbContext, and SQL Server">
+  <rect width="1100" height="240" rx="8" fill="#0d1117"/>
+  <text x="28" y="36" fill="#9ba7b4" font-family="Arial,sans-serif" font-size="15" letter-spacing="2">STUDY TRACKER / REQUEST FLOW</text>
+  <g fill="#161b22" stroke="#46515d" stroke-width="1.5">
+    <rect x="28" y="100" width="140" height="58" rx="5"/>
+    <rect x="208" y="100" width="166" height="58" rx="5"/>
+    <rect x="414" y="66" width="190" height="48" rx="5"/>
+    <rect x="414" y="144" width="190" height="48" rx="5"/>
+    <rect x="644" y="100" width="174" height="58" rx="5"/>
+    <rect x="858" y="100" width="194" height="58" rx="5"/>
+  </g>
+  <g fill="none" stroke="#b1e36d" stroke-width="2"><path d="M168 129h40m166 0h20V90h20m-20 39v39h20m190-78h20v39h20m-20 0v39h-20m194-39h40"/></g>
+  <g fill="#e6edf3" font-family="Arial,sans-serif" font-size="16" text-anchor="middle">
+    <text x="98" y="135">HTTP client</text><text x="291" y="125">Minimal API</text><text x="291" y="145" font-size="12" fill="#9ba7b4">Program.cs</text>
+    <text x="509" y="95" font-size="14">LearningTopicService</text><text x="509" y="173" font-size="14">StudySessionService</text>
+    <text x="731" y="125">AppDbContext</text><text x="731" y="145" font-size="12" fill="#9ba7b4">EF Core</text><text x="955" y="135">SQL Server</text>
+  </g>
+</svg>
