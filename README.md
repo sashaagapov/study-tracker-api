@@ -2,6 +2,16 @@
 
 An ASP.NET Core Minimal API for organizing learning topics and recording study sessions. It uses EF Core with SQL Server. The database migration seeds three topics, including **ASP.NET Core Web API** and **EF Core**; those records are defined in [AppDbContext](Data/AppDbContext.cs), so you can inspect the example without running the service.
 
+**Status:** unfinished learning project. It is intended for local practice and does not include an automated test project.
+
+[Project map](#explore-the-project) · [API flow](#api-flow) · [Example](#example-from-the-checked-in-seed-data) · [Run locally](#run-locally)
+
+## API flow
+
+![API flow: HTTP client to minimal API routes, topic and session services, EF Core DbContext, and SQL Server](docs/api-flow.svg)
+
+The endpoints use services for topic and session operations. EF Core maps the one-to-many relationship between a learning topic and its study sessions. Unhandled exceptions pass through the configured exception handler.
+
 ## Explore the project
 
 | Area | What is here | Start with |
